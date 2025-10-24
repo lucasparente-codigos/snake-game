@@ -1,0 +1,211 @@
+/* ============================================
+   🎨 SNAKE GAME - ESTILOS PRINCIPAIS
+   ============================================ */
+
+/* Reset e configurações globais */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+#app {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* ============================================
+   🎮 CONTAINER DO JOGO
+   ============================================ */
+
+.game-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  background: linear-gradient(45deg, #00ff41, #0f3460);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    filter: drop-shadow(0 0 5px rgba(0, 255, 65, 0.5));
+  }
+  to {
+    filter: drop-shadow(0 0 20px rgba(0, 255, 65, 0.8));
+  }
+}
+
+/* ============================================
+   🖼️ CANVAS E WRAPPER
+   ============================================ */
+
+.game-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+#gameCanvas {
+  border-radius: 10px;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 65, 0.2),
+    0 0 40px rgba(15, 52, 96, 0.3),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(0, 255, 65, 0.3);
+  background: #0a0a0a;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ============================================
+   🕹️ CONTROLES
+   ============================================ */
+
+.game-controls {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.controls-section h3 {
+  color: #00ff41;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls-section p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+.controls-section strong {
+  color: #e94560;
+  background: rgba(233, 69, 96, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* ============================================
+   ℹ️ INFORMAÇÕES DO JOGO
+   ============================================ */
+
+.game-info {
+  text-align: center;
+  padding: 15px;
+  background: rgba(0, 255, 65, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.game-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================
+   📱 RESPONSIVIDADE
+   ============================================ */
+
+@media (max-width: 600px) {
+  .game-container {
+    padding: 20px;
+  }
+
+  .game-title {
+    font-size: 2rem;
+  }
+
+  #gameCanvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .controls-section p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 400px) {
+  body {
+    padding: 10px;
+  }
+
+  .game-container {
+    padding: 15px;
+  }
+
+  .game-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+
+  .game-controls {
+    padding: 15px;
+  }
+}
+
+/* ============================================
+   ✨ ANIMAÇÕES E EFEITOS
+   ============================================ */
+
+.game-container {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efeito hover no canvas (feedback visual) */
+#gameCanvas {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#gameCanvas:hover {
+  transform: scale(1.01);
+  box-shadow: 
+    0 0 30px rgba(0, 255, 65, 0.3),
+    0 0 50px rgba(15, 52, 96, 0.4),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
