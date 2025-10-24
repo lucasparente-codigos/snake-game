@@ -1,5 +1,5 @@
 /* ============================================
-   🎨 SNAKE GAME - ESTILOS PRINCIPAIS
+   🌑 SNAKE GAME - TEMA MINIMALISTA DARK
    ============================================ */
 
 /* Reset e configurações globais */
@@ -9,15 +9,40 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Paleta minimalista dark */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #121212;
+  --bg-tertiary: #1a1a1a;
+  
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #606060;
+  
+  --accent-primary: #ffffff;
+  --accent-secondary: #333333;
+  
+  --border-color: #222222;
+  
+  /* Espaçamentos */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 20px;
+  --spacing-lg: 32px;
+}
+
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: var(--spacing-md);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
@@ -30,33 +55,19 @@ body {
    ============================================ */
 
 .game-container {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
 }
 
 .game-title {
   text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  background: linear-gradient(45deg, #00ff41, #0f3460);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
-  animation: glow 2s ease-in-out infinite alternate;
-}
-
-@keyframes glow {
-  from {
-    filter: drop-shadow(0 0 5px rgba(0, 255, 65, 0.5));
-  }
-  to {
-    filter: drop-shadow(0 0 20px rgba(0, 255, 65, 0.8));
-  }
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 /* ============================================
@@ -66,20 +77,16 @@ body {
 .game-wrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: 25px;
-  position: relative;
+  margin-bottom: var(--spacing-lg);
 }
 
 #gameCanvas {
-  border-radius: 10px;
-  box-shadow: 
-    0 0 20px rgba(0, 255, 65, 0.2),
-    0 0 40px rgba(15, 52, 96, 0.3),
-    inset 0 0 20px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(0, 255, 65, 0.3);
-  background: #0a0a0a;
+  border-radius: 2px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  display: block;
 }
 
 /* ============================================
@@ -87,35 +94,37 @@ body {
    ============================================ */
 
 .game-controls {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--border-color);
 }
 
 .controls-section h3 {
-  color: #00ff41;
-  margin-bottom: 12px;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .controls-section p {
-  margin: 8px 0;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  margin: var(--spacing-xs) 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
 .controls-section strong {
-  color: #e94560;
-  background: rgba(233, 69, 96, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--accent-secondary);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  font-family: 'Monaco', 'Courier New', monospace;
 }
 
 /* ============================================
@@ -124,16 +133,17 @@ body {
 
 .game-info {
   text-align: center;
-  padding: 15px;
-  background: rgba(0, 255, 65, 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(0, 255, 65, 0.2);
+  padding: var(--spacing-md);
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
 }
 
 .game-info p {
-  margin: 5px 0;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  margin: 4px 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 /* ============================================
@@ -142,11 +152,11 @@ body {
 
 @media (max-width: 600px) {
   .game-container {
-    padding: 20px;
+    padding: var(--spacing-md);
   }
 
   .game-title {
-    font-size: 2rem;
+    font-size: 1.25rem;
   }
 
   #gameCanvas {
@@ -155,41 +165,54 @@ body {
   }
 
   .controls-section p {
-    font-size: 0.85rem;
+    font-size: 0.8125rem;
   }
 }
 
 @media (max-width: 400px) {
   body {
-    padding: 10px;
+    padding: var(--spacing-sm);
   }
 
   .game-container {
-    padding: 15px;
+    padding: var(--spacing-sm);
   }
 
   .game-title {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-md);
   }
 
-  .game-controls {
-    padding: 15px;
+  .game-controls,
+  .game-info {
+    padding: var(--spacing-sm);
   }
 }
 
 /* ============================================
-   ✨ ANIMAÇÕES E EFEITOS
+   ✨ TRANSIÇÕES SUAVES
    ============================================ */
 
-.game-container {
-  animation: fadeIn 0.5s ease-in-out;
+.game-container,
+.game-controls,
+.game-info,
+#gameCanvas {
+  transition: border-color 0.2s ease;
 }
 
-@keyframes fadeIn {
+.game-container:hover {
+  border-color: var(--accent-secondary);
+}
+
+/* Animação de entrada minimalista */
+.game-container {
+  animation: fadeInMinimal 0.3s ease-out;
+}
+
+@keyframes fadeInMinimal {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -197,15 +220,16 @@ body {
   }
 }
 
-/* Efeito hover no canvas (feedback visual) */
-#gameCanvas {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ============================================
+   🎯 FOCO E ACESSIBILIDADE
+   ============================================ */
+
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
-#gameCanvas:hover {
-  transform: scale(1.01);
-  box-shadow: 
-    0 0 30px rgba(0, 255, 65, 0.3),
-    0 0 50px rgba(15, 52, 96, 0.4),
-    inset 0 0 20px rgba(0, 0, 0, 0.3);
+/* Remove outline padrão mas mantém acessibilidade */
+*:focus:not(:focus-visible) {
+  outline: none;
 }

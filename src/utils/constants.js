@@ -17,15 +17,15 @@ export const CANVAS_HEIGHT = GRID_SIZE * CELL_SIZE;
 export const GAME_SPEED = 150;
 
 // ============================================
-// 🎨 CORES
+// 🎨 CORES - TEMA MINIMALISTA DARK
 // ============================================
 
 export const COLORS = {
-  background: '#1a1a2e',
-  grid: '#16213e',
-  snake: '#0f3460',
-  snakeHead: '#e94560',
-  food: '#00ff41',
+  background: '#0a0a0a',
+  grid: '#1a1a1a',
+  snake: '#333333',
+  snakeHead: '#ffffff',
+  food: '#e0e0e0',
   text: '#ffffff',
 };
 
