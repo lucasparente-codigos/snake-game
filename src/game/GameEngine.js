@@ -4,6 +4,8 @@ import { Food } from './Food.js';
 import { DIRECTIONS, KEYS, COLORS } from '../utils/constants.js';
 import { ScoreManager } from '../utils/ScoreManager.js';
 import { StorageManager } from '../utils/StorageManager.js';
+import { PowerUpManager } from '../utils/PowerUpManager.js';
+import { calculateFoodPoints } from '../utils/foodTypes.js';
 
 // ============================================
 // 🎮 GAME ENGINE - Orquestrador do Jogo
@@ -19,6 +21,7 @@ export class GameEngine {
     this.snake = new Snake(this.grid);
     this.food = new Food(this.grid);
     this.scoreManager = new ScoreManager(difficulty);
+    this.powerUpManager = new PowerUpManager();
 
     // Estado do jogo
     this.isGameOver = false;
@@ -29,15 +32,31 @@ export class GameEngine {
     // Animação de level up
     this.showLevelUpAnimation = false;
     this.levelUpAnimationTime = 0;
+    
+    // Animação de power-up coletado
+    this.showPowerUpNotification = false;
+    this.powerUpNotificationText = '';
+    this.powerUpNotificationTime = 0;
 
     // Bind dos métodos
     this.handleKeyPress = this.handleKeyPress.bind(this);
+    
+    // Callback quando power-up expira
+    this.powerUpManager.onPowerUpExpired = (powerUpId) => {
+      console.log(`⏰ Power-up expirou: ${powerUpId}`);
+      // Se era slow motion ou speed boost, ajusta velocidade
+      if (powerUpId === 'slow_motion' || powerUpId === 'speed_boost') {
+        this.startGameLoop();
+      }
+    };
 
     // Spawna a primeira comida
     this.food.spawn(this.snake.body);
 
     // Carrega high score
     this.highScore = StorageManager.getHighScore();
+    
+    console.log('🎮 GameEngine inicializado!');
   }
 
   /**
@@ -66,8 +85,14 @@ export class GameEngine {
       clearInterval(this.gameLoopInterval);
     }
 
-    // Pega a velocidade atual do ScoreManager
-    const speed = this.scoreManager.getGameSpeed();
+    // Pega a velocidade base do ScoreManager
+    let speed = this.scoreManager.getGameSpeed();
+    
+    // Aplica modificador de power-ups
+    const speedModifier = this.powerUpManager.getSpeedModifier();
+    speed = Math.floor(speed * speedModifier);
+
+    console.log(`🏃 Velocidade ajustada: ${speed}ms (modifier: ${speedModifier})`);
 
     // Inicia novo loop
     this.gameLoopInterval = setInterval(() => {
@@ -96,39 +121,77 @@ export class GameEngine {
     // Move a cobra
     this.snake.move();
 
-    // Verifica colisões
-    if (this.snake.checkCollision()) {
+    // Verifica colisões (a não ser que tenha shield)
+    if (!this.powerUpManager.hasShield() && this.snake.checkCollision()) {
       this.gameOver();
       return;
     }
 
     // Verifica se comeu a comida
     if (this.food.isEaten(this.snake.getHead())) {
-      // Marca que a cobra comeu
-      this.snake.eat();
-
-      // Atualiza pontuação e recebe feedback
-      const scoreInfo = this.scoreManager.eatFood();
-
-      // Atualiza estatísticas globais
-      StorageManager.addFoodEaten(1);
-
-      // Se subiu de nível, reinicia o loop com nova velocidade
-      if (scoreInfo.leveledUp) {
-        this.showLevelUpAnimation = true;
-        this.levelUpAnimationTime = Date.now();
-        this.startGameLoop(); // Atualiza velocidade!
-        console.log('🎉 LEVEL UP! Nível:', scoreInfo.currentLevel);
-      }
-
-      // Log de combo (debug)
-      if (scoreInfo.isCombo) {
-        console.log('🔥 COMBO x' + scoreInfo.comboStreak);
-      }
-
-      // Spawna nova comida
-      this.food.spawn(this.snake.body);
+      this.handleFoodEaten();
     }
+  }
+
+  /**
+   * Processa quando a cobra come a comida
+   */
+  handleFoodEaten() {
+    // Marca que a cobra comeu
+    this.snake.eat();
+    
+    // Pega informações da comida
+    const foodType = this.food.getType();
+    const powerUp = this.food.getPowerUp();
+    
+    // Calcula pontos considerando tipo de comida e power-ups
+    const hasDoublePoints = this.powerUpManager.hasDoublePoints();
+    const levelMultiplier = 1; // Pode adicionar multiplicador de nível aqui
+    const points = calculateFoodPoints(foodType, levelMultiplier, hasDoublePoints);
+    
+    // Adiciona pontos manualmente (não usa eatFood do ScoreManager)
+    this.scoreManager.score += points;
+    this.scoreManager.foodEaten++;
+    this.scoreManager.currentStreak++;
+    
+    // Atualiza tempo para combo
+    this.scoreManager.lastEatTime = Date.now();
+    
+    // Atualiza estatísticas globais
+    StorageManager.addFoodEaten(1);
+    
+    // Se a comida tem power-up, ativa
+    if (powerUp) {
+      const activatedPowerUp = this.powerUpManager.activate(powerUp);
+      
+      if (activatedPowerUp) {
+        // Mostra notificação
+        this.showPowerUpNotification = true;
+        this.powerUpNotificationText = `${activatedPowerUp.emoji} ${activatedPowerUp.name}!`;
+        this.powerUpNotificationTime = Date.now();
+        
+        // Se é slow motion ou speed boost, ajusta velocidade
+        if (powerUp === 'slow_motion' || powerUp === 'speed_boost') {
+          this.startGameLoop();
+        }
+      }
+    }
+    
+    // Verifica se subiu de nível
+    const leveledUp = this.scoreManager.checkLevelUp();
+    
+    if (leveledUp) {
+      this.showLevelUpAnimation = true;
+      this.levelUpAnimationTime = Date.now();
+      this.startGameLoop(); // Atualiza velocidade!
+      console.log('🎉 LEVEL UP! Nível:', this.scoreManager.level);
+    }
+    
+    // Log de informações
+    console.log(`🍎 Comeu ${foodType.name}: +${points} pontos (Total: ${this.scoreManager.score})`);
+    
+    // Spawna nova comida
+    this.food.spawn(this.snake.body);
   }
 
   /**
@@ -146,10 +209,18 @@ export class GameEngine {
 
     // Desenha o HUD (score, nível, etc)
     this.drawHUD();
+    
+    // Desenha power-ups ativos
+    this.drawActivePowerUps();
 
     // Animação de Level Up
     if (this.showLevelUpAnimation) {
       this.drawLevelUpAnimation();
+    }
+    
+    // Notificação de power-up coletado
+    if (this.showPowerUpNotification) {
+      this.drawPowerUpNotification();
     }
 
     // Se game over, desenha a tela de fim
@@ -220,6 +291,50 @@ export class GameEngine {
       this.canvas.height - 10
     );
   }
+  
+  /**
+   * Desenha power-ups ativos no canto superior direito
+   */
+  drawActivePowerUps() {
+    const activePowerUps = this.powerUpManager.getActivePowerUps();
+    
+    if (activePowerUps.length === 0) return;
+    
+    const startX = this.canvas.width - 10;
+    const startY = 60;
+    const spacing = 35;
+    
+    activePowerUps.forEach((powerUp, index) => {
+      const y = startY + (index * spacing);
+      const timeRemaining = this.powerUpManager.getTimeRemaining(powerUp.id);
+      const progress = 1 - this.powerUpManager.getProgress(powerUp.id);
+      
+      // Fundo da barra
+      this.ctx.fillStyle = '#333';
+      this.ctx.fillRect(startX - 60, y, 60, 20);
+      
+      // Progresso (barra que diminui)
+      this.ctx.fillStyle = powerUp.color;
+      this.ctx.globalAlpha = 0.7;
+      this.ctx.fillRect(startX - 60, y, 60 * progress, 20);
+      this.ctx.globalAlpha = 1;
+      
+      // Ícone do power-up
+      this.ctx.fillStyle = COLORS.text;
+      this.ctx.font = '16px monospace';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText(powerUp.emoji, startX - 55, y + 15);
+      
+      // Tempo restante
+      this.ctx.font = '10px monospace';
+      this.ctx.textAlign = 'right';
+      this.ctx.fillText(
+        `${Math.ceil(timeRemaining / 1000)}s`,
+        startX - 5,
+        y + 14
+      );
+    });
+  }
 
   /**
    * Desenha animação de Level Up
@@ -248,6 +363,41 @@ export class GameEngine {
       'LEVEL UP!',
       this.canvas.width / 2,
       this.canvas.height / 2
+    );
+
+    // Restaura contexto
+    this.ctx.restore();
+  }
+  
+  /**
+   * Desenha notificação de power-up coletado
+   */
+  drawPowerUpNotification() {
+    const elapsed = Date.now() - this.powerUpNotificationTime;
+    const duration = 2000; // 2 segundos
+
+    if (elapsed > duration) {
+      this.showPowerUpNotification = false;
+      return;
+    }
+
+    // Calcula opacidade e movimento (sobe e desaparece)
+    const progress = elapsed / duration;
+    const opacity = Math.max(0, 1 - progress);
+    const yOffset = progress * 30; // Sobe 30px
+
+    // Salva contexto
+    this.ctx.save();
+
+    // Texto do power-up
+    this.ctx.globalAlpha = opacity;
+    this.ctx.fillStyle = '#ffd43b';
+    this.ctx.font = 'bold 24px monospace';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(
+      this.powerUpNotificationText,
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 50 - yOffset
     );
 
     // Restaura contexto
@@ -385,7 +535,14 @@ export class GameEngine {
     if (this.isPaused) {
       // Reseta combo ao pausar
       this.scoreManager.resetCombo();
+      
+      // Pausa power-ups
+      this.powerUpManager.pause();
+      
       this.render();
+    } else {
+      // Resume power-ups
+      this.powerUpManager.resume();
     }
   }
 
@@ -406,6 +563,9 @@ export class GameEngine {
     // Tenta salvar high score
     this.isNewRecord = StorageManager.saveHighScore(stats.score);
 
+    // Limpa power-ups
+    this.powerUpManager.clearAll();
+
     // Log de estatísticas
     console.log('📊 Estatísticas da partida:', stats);
     console.log('📊 Estatísticas globais:', StorageManager.getAllStats());
@@ -420,9 +580,11 @@ export class GameEngine {
     this.isPaused = false;
     this.isNewRecord = false;
     this.showLevelUpAnimation = false;
+    this.showPowerUpNotification = false;
     
     this.snake.reset();
     this.scoreManager.reset();
+    this.powerUpManager.clearAll();
     this.food.spawn(this.snake.body);
     
     // Atualiza high score
@@ -449,6 +611,7 @@ export class GameEngine {
       ...this.scoreManager.getStats(),
       highScore: this.highScore,
       globalStats: StorageManager.getAllStats(),
+      powerUps: this.powerUpManager.getDebugInfo(),
     };
   }
 }

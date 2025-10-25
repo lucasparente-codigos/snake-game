@@ -1,6 +1,7 @@
 import './styles/main.css';
 import { GameEngine } from './game/GameEngine.js';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/constants.js';
+import { StorageManager } from './utils/StorageManager.js';
 
 // ============================================
 // 🎮 MAIN - Entry Point do Jogo
@@ -10,16 +11,19 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/constants.js';
  * Inicializa o jogo
  */
 function init() {
+  console.log('🔧 Iniciando aplicação...');
+
   // Pega o container do app
   const app = document.querySelector('#app');
 
   // Pega estatísticas globais
   const globalStats = StorageManager.getAllStats();
+  console.log('📊 Estatísticas carregadas:', globalStats);
 
   // Cria a estrutura HTML
   app.innerHTML = `
     <div class="game-container">
-      <h1 class="game-title">Snake Game</h1>
+      <h1 class="game-title">🐍 Snake Game</h1>
       
       <div class="game-wrapper">
         <canvas id="gameCanvas" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}"></canvas>
@@ -27,7 +31,7 @@ function init() {
       
       <div class="game-controls">
         <div class="controls-section">
-          <h3>Controls</h3>
+          <h3>🕹️ Controls</h3>
           <p><strong>Arrow Keys</strong> or <strong>WASD</strong> - Move</p>
           <p><strong>ESC</strong> or <strong>P</strong> - Pause</p>
           <p><strong>SPACE</strong> - Restart (when game over)</p>
@@ -43,27 +47,38 @@ function init() {
     </div>
   `;
 
+  console.log('✅ HTML criado');
+
   // Pega o canvas
   const canvas = document.getElementById('gameCanvas');
 
   // Verifica se o canvas foi criado
   if (!canvas) {
-    console.error('Canvas não encontrado!');
+    console.error('❌ Canvas não encontrado!');
     return;
   }
 
-  // Cria e inicia o game engine
-  const game = new GameEngine(canvas);
-  game.start();
+  console.log('✅ Canvas encontrado');
 
-  // Log de inicialização
-  console.log('🐍 Snake Game iniciado!');
-  console.log('📊 Canvas size:', CANVAS_WIDTH, 'x', CANVAS_HEIGHT);
+  try {
+    // Cria e inicia o game engine
+    const game = new GameEngine(canvas);
+    console.log('✅ GameEngine criado');
+    
+    game.start();
+    console.log('✅ Jogo iniciado!');
 
-  // Expõe o game no window para debug (remover em produção)
-  if (import.meta.env.DEV) {
-    window.game = game;
-    console.log('🔧 Debug mode: acesse "window.game" no console');
+    // Log de inicialização
+    console.log('🐍 Snake Game iniciado com sucesso!');
+    console.log('📊 Canvas size:', CANVAS_WIDTH, 'x', CANVAS_HEIGHT);
+
+    // Expõe o game no window para debug (remover em produção)
+    if (import.meta.env.DEV) {
+      window.game = game;
+      console.log('🔧 Debug mode: acesse "window.game" no console');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao inicializar o jogo:', error);
   }
 }
 
