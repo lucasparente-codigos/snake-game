@@ -2,8 +2,8 @@
 // ⚡ POWER-UP MANAGER - Gerencia Efeitos Ativos
 // ============================================
 
-import { POWER_UPS } from './foodTypes';
-import type { ActivePowerUp, PowerUpDebugInfo } from '../types';
+import { POWER_UPS } from '../foodTypes';
+import type { ActivePowerUp, PowerUpDebugInfo } from '../../types';
 
 export class PowerUpManager {
   // Power-ups ativos (Map para fácil acesso por ID)

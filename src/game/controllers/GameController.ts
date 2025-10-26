@@ -3,10 +3,10 @@
 // ============================================
 
 import { GameEngine } from './GameEngine';
-import { GameStateManager, GameState } from './GameStateManager';
-import { MenuRenderer } from './MenuRenderer';
-import { StorageManager } from '../utils/StorageManager';
-import type { Difficulty, MenuItem } from '../types';
+import { GameStateManager, GameState } from '../managers/GameStateManager';
+import { MenuRenderer } from '../renderers/MenuRenderer';
+import { StorageManager } from '../../utils/managers/StorageManager';
+import type { Difficulty, MenuItem } from '../../types';
 
 export class GameController {
   private canvas: HTMLCanvasElement;
@@ -270,36 +270,49 @@ export class GameController {
     const key = event.key;
     const state = this.stateManager.getCurrentState();
     
-    // Se está jogando, delega pro GameEngine
-    if (state === GameState.PLAYING) {
-      return;
-    }
-    
-    // Previne scroll
+    // Previne scroll com as setas e espaço
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
       event.preventDefault();
     }
     
-    // Navegação no menu
+    // ============================================
+    // 🎮 ESTADO: PLAYING
+    // ============================================
+    if (state === GameState.PLAYING) {
+      // ESC: Para o jogo e volta pro menu
+      if (key === 'Escape' && this.gameEngine) {
+        this.gameEngine.stop();
+        this.transitionToMenu();
+      }
+      
+      // Outras teclas: GameEngine cuida (movimento da cobra)
+      return;
+    }
+    
+    // ============================================
+    // 🎯 ESTADO: MENU ou SETTINGS
+    // ============================================
     if (state === GameState.MENU || state === GameState.SETTINGS) {
+      // Navegação vertical
       if (key === 'ArrowUp' || key === 'w' || key === 'W') {
         this.menuRenderer.moveUp();
       } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
         this.menuRenderer.moveDown();
-      } else if (key === 'Enter' || key === ' ') {
+      }
+      // Seleção
+      else if (key === 'Enter' || key === ' ') {
         this.menuRenderer.select();
       }
     }
     
-    // ESC volta para o menu
+    // ============================================
+    // ⬅️ ESC: Volta para o menu
+    // ============================================
     if (key === 'Escape') {
       if (state === GameState.SETTINGS || state === GameState.STATS) {
         this.transitionToMenu();
-      } else if (state === GameState.PLAYING && this.gameEngine) {
-        // Para o jogo e volta pro menu
-        this.gameEngine.stop();
-        this.transitionToMenu();
       }
+      // Nota: PLAYING já foi tratado acima
     }
   }
 }

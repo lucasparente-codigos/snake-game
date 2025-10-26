@@ -2,7 +2,7 @@
 // 🎯 SCORE MANAGER - Sistema de Pontuação
 // ============================================
 
-import type { Difficulty, DifficultySettingsMap, GameStats, EatFoodResult } from '../types';
+import type { Difficulty, DifficultySettingsMap, GameStats, EatFoodResult } from '../../types';
 
 /**
  * Configurações de dificuldade

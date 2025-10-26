@@ -2,15 +2,15 @@
 // 🎮 GAME ENGINE - Orquestrador do Jogo
 // ============================================
 
-import { Grid } from './Grid';
-import { Snake } from './Snake';
-import { Food } from './Food';
-import { DIRECTIONS, KEYS, COLORS } from '../utils/constants';
-import { ScoreManager } from '../utils/ScoreManager';
-import { StorageManager } from '../utils/StorageManager';
-import { PowerUpManager } from '../utils/PowerUpManager';
-import { calculateFoodPoints } from '../utils/foodTypes';
-import type { Difficulty, DirectionName } from '../types';
+import { Grid } from '../entities/Grid';
+import { Snake } from '../entities/Snake';
+import { Food } from '../entities/Food';
+import { DIRECTIONS, KEYS, COLORS } from '../../utils/constants';
+import { ScoreManager } from '../../utils/managers/ScoreManager';
+import { StorageManager } from '../../utils/managers/StorageManager';
+import { PowerUpManager } from '../../utils/managers/PowerUpManager';
+import { calculateFoodPoints } from '../../utils/foodTypes';
+import type { Difficulty } from '../../types';
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;

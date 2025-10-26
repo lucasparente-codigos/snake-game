@@ -2,9 +2,9 @@
 // 🍎 FOOD - Lógica da Comida
 // ============================================
 
-import { isPositionInList } from '../utils/helpers';
-import { selectRandomFoodType } from '../utils/foodTypes';
-import type { Position, FoodType } from '../types';
+import { isPositionInList } from '../../utils/helpers';
+import { selectRandomFoodType } from '../../utils/foodTypes';
+import type { Position, FoodType } from '../../types';
 import type { Grid } from './Grid';
 
 export class Food {

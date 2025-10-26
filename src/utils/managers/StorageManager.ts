@@ -2,7 +2,7 @@
 // 💾 STORAGE MANAGER - Gerencia localStorage
 // ============================================
 
-import type { GlobalStats, GameSettings } from '';
+import type { GlobalStats, GameSettings } from '../../types';
 
 const STORAGE_KEYS = {
   HIGH_SCORE: 'snake_high_score',

@@ -3,7 +3,7 @@
 // ============================================
 
 import './styles/main.css';
-import { GameController } from './game/GameController';
+import { GameController } from './game/controllers/GameController';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/constants';
 
 /**

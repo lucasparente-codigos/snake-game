@@ -2,8 +2,8 @@
 // 🎨 MENU RENDERER - Renderiza Menus no Canvas
 // ============================================
 
-import { COLORS } from '../utils/constants';
-import type { GlobalStats } from '../types';
+import { COLORS } from '../../utils/constants';
+import type { GlobalStats } from '../../types';
 
 interface MenuItem {
   text: string;
