@@ -1,5 +1,8 @@
 // ============================================
 // 🎮 GAME CONTROLLER - Controlador Principal
+// Sugestões de Melhoria Aplicadas:
+// - Uso do callback onGameOver do GameEngine para melhor encapsulamento.
+// - Simplificação da lógica de menu.
 // ============================================
 
 import { GameEngine } from './GameEngine';
@@ -48,7 +51,7 @@ export class GameController {
     document.addEventListener('keydown', this.handleKeyPress);
     
     // Inicia no menu
-    this.transitionToMenu();
+    this.navigateToMenu();
     
     // Inicia o loop de renderização
     this.startGameLoop();
@@ -134,9 +137,9 @@ export class GameController {
   }
 
   /**
-   * Transição para o menu principal
+   * Navega para o menu principal
    */
-  private transitionToMenu(): void {
+  private navigateToMenu(): void {
     this.stateManager.transitionTo(GameState.MENU);
     
     const menuItems: MenuItem[] = [
@@ -178,7 +181,7 @@ export class GameController {
       },
       {
         text: 'BACK',
-        action: () => this.transitionToMenu(),
+        action: () => this.navigateToMenu(),
       },
     ];
     
@@ -190,6 +193,16 @@ export class GameController {
    */
   private openStats(): void {
     this.stateManager.transitionTo(GameState.STATS);
+    
+    // O MenuRenderer lida com a renderização, mas precisamos definir os itens
+    // para que a navegação por teclado funcione (tecla ESC para voltar)
+    const menuItems: MenuItem[] = [
+      {
+        text: 'BACK',
+        action: () => this.navigateToMenu(),
+      },
+    ];
+    this.menuRenderer.setMenuItems(menuItems);
   }
 
   /**
@@ -200,22 +213,23 @@ export class GameController {
     
     this.stateManager.transitionTo(GameState.PLAYING);
     
-    // Cria nova instância do game engine
-    this.gameEngine = new GameEngine(this.canvas, this.difficulty);
-    
-    // Callback quando o jogo termina
-    const originalGameOver = this.gameEngine['gameOver'].bind(this.gameEngine);
-    this.gameEngine['gameOver'] = () => {
-      originalGameOver();
-      
-      // Aguarda um momento antes de voltar ao menu
-      setTimeout(() => {
-        this.transitionToMenu();
-      }, 3000); // 3 segundos pra ver a tela de game over
-    };
+    // Cria nova instância do game engine, passando o callback de Game Over
+    this.gameEngine = new GameEngine(this.canvas, this.difficulty, this.handleGameOver);
     
     this.gameEngine.start();
   }
+
+  /**
+   * Callback chamado pelo GameEngine quando o jogo termina (Game Over).
+   */
+  private handleGameOver = (finalScore: number, isNewRecord: boolean): void => {
+    console.log(`💀 Game Over tratado pelo Controller. Score: ${finalScore}. Novo Recorde: ${isNewRecord}`);
+    
+    // Aguarda um momento para o jogador ver a tela de Game Over
+    setTimeout(() => {
+      this.navigateToMenu();
+    }, 3000); // 3 segundos
+  };
 
   /**
    * Alterna dificuldade
@@ -282,17 +296,17 @@ export class GameController {
       // ESC: Para o jogo e volta pro menu
       if (key === 'Escape' && this.gameEngine) {
         this.gameEngine.stop();
-        this.transitionToMenu();
+        this.navigateToMenu();
       }
       
-      // Outras teclas: GameEngine cuida (movimento da cobra)
+      // Outras teclas: GameEngine cuida (movimento da cobra, pausa)
       return;
     }
     
     // ============================================
-    // 🎯 ESTADO: MENU ou SETTINGS
+    // 🎯 ESTADO: MENU, SETTINGS ou STATS
     // ============================================
-    if (state === GameState.MENU || state === GameState.SETTINGS) {
+    if (state === GameState.MENU || state === GameState.SETTINGS || state === GameState.STATS) {
       // Navegação vertical
       if (key === 'ArrowUp' || key === 'w' || key === 'W') {
         this.menuRenderer.moveUp();
@@ -310,7 +324,7 @@ export class GameController {
     // ============================================
     if (key === 'Escape') {
       if (state === GameState.SETTINGS || state === GameState.STATS) {
-        this.transitionToMenu();
+        this.navigateToMenu();
       }
       // Nota: PLAYING já foi tratado acima
     }
