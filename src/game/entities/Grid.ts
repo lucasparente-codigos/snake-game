@@ -2,9 +2,9 @@
 // 🎲 GRID - Sistema de Coordenadas
 // ============================================
 
-import { GRID_SIZE, CELL_SIZE, COLORS } from '../utils/constants';
-import { gridToPixel } from '../utils/helpers';
-import type { Position } from '../types';
+import { GRID_SIZE, CELL_SIZE, COLORS } from '../../utils/constants';
+import { gridToPixel } from '../../utils/helpers';
+import type { Position } from '../../types';
 
 export class Grid {
   public canvas: HTMLCanvasElement;

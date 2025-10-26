@@ -2,9 +2,9 @@
 // 🐍 SNAKE - Lógica da Cobra
 // ============================================
 
-import { DIRECTIONS, COLORS } from '.../utils/constants';
-import { isSamePosition, isPositionInList } from '../utils/helpers';
-import type { Position, Direction } from '../types';
+import { DIRECTIONS, COLORS } from '../../utils/constants';
+import { isSamePosition, isPositionInList } from '../../utils/helpers';
+import type { Position, Direction } from '../../types';
 import type { Grid } from './Grid';
 
 export class Snake {
