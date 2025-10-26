@@ -2,23 +2,26 @@
 // ⚡ POWER-UP MANAGER - Gerencia Efeitos Ativos
 // ============================================
 
-import { POWER_UPS } from './foodTypes.js';
+import { POWER_UPS } from './foodTypes';
+import type { ActivePowerUp, PowerUpDebugInfo } from '../types';
 
 export class PowerUpManager {
+  // Power-ups ativos (Map para fácil acesso por ID)
+  private activePowerUps: Map<string, ActivePowerUp>;
+  
+  // Callbacks para quando power-ups expiram
+  public onPowerUpExpired: ((powerUpId: string) => void) | null = null;
+
   constructor() {
-    // Power-ups ativos (Map para fácil acesso por ID)
     this.activePowerUps = new Map();
-    
-    // Callbacks para quando power-ups expiram
-    this.onPowerUpExpired = null;
   }
 
   /**
    * Ativa um power-up
-   * @param {string} powerUpId - ID do power-up
-   * @returns {Object|null} Informações do power-up ativado
+   * @param powerUpId - ID do power-up
+   * @returns Informações do power-up ativado
    */
-  activate(powerUpId) {
+  activate(powerUpId: string): ActivePowerUp | null {
     const powerUp = POWER_UPS[powerUpId];
     
     if (!powerUp) {
@@ -32,7 +35,7 @@ export class PowerUpManager {
     }
 
     // Cria dados do power-up ativo
-    const activePowerUp = {
+    const activePowerUp: ActivePowerUp = {
       ...powerUp,
       startTime: Date.now(),
       endTime: Date.now() + powerUp.duration,
@@ -40,7 +43,7 @@ export class PowerUpManager {
     };
 
     // Agenda a remoção automática
-    activePowerUp.timeoutId = setTimeout(() => {
+    activePowerUp.timeoutId = window.setTimeout(() => {
       this.deactivate(powerUpId);
     }, powerUp.duration);
 
@@ -54,10 +57,10 @@ export class PowerUpManager {
 
   /**
    * Desativa um power-up
-   * @param {string} powerUpId - ID do power-up
-   * @returns {boolean} True se foi desativado
+   * @param powerUpId - ID do power-up
+   * @returns True se foi desativado
    */
-  deactivate(powerUpId) {
+  deactivate(powerUpId: string): boolean {
     const powerUp = this.activePowerUps.get(powerUpId);
     
     if (!powerUp) {
@@ -65,7 +68,7 @@ export class PowerUpManager {
     }
 
     // Cancela o timeout
-    if (powerUp.timeoutId) {
+    if (powerUp.timeoutId !== null) {
       clearTimeout(powerUp.timeoutId);
     }
 
@@ -84,19 +87,19 @@ export class PowerUpManager {
 
   /**
    * Verifica se um power-up específico está ativo
-   * @param {string} powerUpId - ID do power-up
-   * @returns {boolean} True se está ativo
+   * @param powerUpId - ID do power-up
+   * @returns True se está ativo
    */
-  isActive(powerUpId) {
+  isActive(powerUpId: string): boolean {
     return this.activePowerUps.has(powerUpId);
   }
 
   /**
    * Retorna tempo restante de um power-up em ms
-   * @param {string} powerUpId - ID do power-up
-   * @returns {number} Milissegundos restantes (0 se não ativo)
+   * @param powerUpId - ID do power-up
+   * @returns Milissegundos restantes (0 se não ativo)
    */
-  getTimeRemaining(powerUpId) {
+  getTimeRemaining(powerUpId: string): number {
     const powerUp = this.activePowerUps.get(powerUpId);
     
     if (!powerUp) {
@@ -109,10 +112,10 @@ export class PowerUpManager {
 
   /**
    * Retorna progresso de um power-up (0-1)
-   * @param {string} powerUpId - ID do power-up
-   * @returns {number} Progresso de 0 a 1
+   * @param powerUpId - ID do power-up
+   * @returns Progresso de 0 a 1
    */
-  getProgress(powerUpId) {
+  getProgress(powerUpId: string): number {
     const powerUp = this.activePowerUps.get(powerUpId);
     
     if (!powerUp) {
@@ -127,36 +130,36 @@ export class PowerUpManager {
 
   /**
    * Retorna todos os power-ups ativos
-   * @returns {Array} Array de power-ups ativos
+   * @returns Array de power-ups ativos
    */
-  getActivePowerUps() {
+  getActivePowerUps(): ActivePowerUp[] {
     return Array.from(this.activePowerUps.values());
   }
 
   /**
    * Verifica efeitos específicos
    */
-  hasDoublePoints() {
+  hasDoublePoints(): boolean {
     return this.isActive('double_points');
   }
 
-  hasShield() {
+  hasShield(): boolean {
     return this.isActive('shield');
   }
 
-  hasSlowMotion() {
+  hasSlowMotion(): boolean {
     return this.isActive('slow_motion');
   }
 
-  hasSpeedBoost() {
+  hasSpeedBoost(): boolean {
     return this.isActive('speed_boost');
   }
 
   /**
    * Retorna modificador de velocidade baseado nos power-ups
-   * @returns {number} Multiplicador de velocidade
+   * @returns Multiplicador de velocidade
    */
-  getSpeedModifier() {
+  getSpeedModifier(): number {
     if (this.hasSlowMotion()) {
       return 1.5; // 50% mais lento (aumenta intervalo)
     }
@@ -171,10 +174,10 @@ export class PowerUpManager {
   /**
    * Limpa todos os power-ups ativos
    */
-  clearAll() {
+  clearAll(): void {
     // Cancela todos os timeouts
     this.activePowerUps.forEach(powerUp => {
-      if (powerUp.timeoutId) {
+      if (powerUp.timeoutId !== null) {
         clearTimeout(powerUp.timeoutId);
       }
     });
@@ -187,9 +190,9 @@ export class PowerUpManager {
 
   /**
    * Retorna informações de debug
-   * @returns {Object} Estado atual dos power-ups
+   * @returns Estado atual dos power-ups
    */
-  getDebugInfo() {
+  getDebugInfo(): PowerUpDebugInfo {
     const active = this.getActivePowerUps();
     
     return {
@@ -211,9 +214,9 @@ export class PowerUpManager {
   /**
    * Pausa todos os power-ups (útil quando pausa o jogo)
    */
-  pause() {
+  pause(): void {
     this.activePowerUps.forEach(powerUp => {
-      if (powerUp.timeoutId) {
+      if (powerUp.timeoutId !== null) {
         clearTimeout(powerUp.timeoutId);
         powerUp.timeoutId = null;
       }
@@ -226,15 +229,15 @@ export class PowerUpManager {
   /**
    * Resume todos os power-ups
    */
-  resume() {
+  resume(): void {
     this.activePowerUps.forEach((powerUp, powerUpId) => {
-      if (powerUp.pausedTimeRemaining) {
+      if (powerUp.pausedTimeRemaining !== undefined) {
         // Recalcula o endTime
         powerUp.startTime = Date.now();
         powerUp.endTime = Date.now() + powerUp.pausedTimeRemaining;
         
         // Agenda novo timeout
-        powerUp.timeoutId = setTimeout(() => {
+        powerUp.timeoutId = window.setTimeout(() => {
           this.deactivate(powerUpId);
         }, powerUp.pausedTimeRemaining);
         

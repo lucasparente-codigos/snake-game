@@ -2,11 +2,13 @@
 // 🍎 FOOD TYPES - Tipos de Comida e Power-ups
 // ============================================
 
+import type { FoodTypeMap, PowerUpMap, FoodType, PowerUp } from '../types';
+
 /**
  * Tipos de comida disponíveis
  * weight = Raridade (quanto maior, mais comum)
  */
-export const FOOD_TYPES = {
+export const FOOD_TYPES: FoodTypeMap = {
   normal: {
     id: 'normal',
     name: 'Normal',
@@ -55,7 +57,7 @@ export const FOOD_TYPES = {
 /**
  * Power-ups disponíveis
  */
-export const POWER_UPS = {
+export const POWER_UPS: PowerUpMap = {
   double_points: {
     id: 'double_points',
     name: 'Double Points',
@@ -95,9 +97,9 @@ export const POWER_UPS = {
 
 /**
  * Seleciona um tipo de comida aleatório baseado no peso
- * @returns {Object} Tipo de comida selecionado
+ * @returns Tipo de comida selecionado
  */
-export function selectRandomFoodType() {
+export function selectRandomFoodType(): FoodType {
   // Calcula peso total
   const totalWeight = Object.values(FOOD_TYPES).reduce(
     (sum, type) => sum + type.weight,
@@ -121,21 +123,25 @@ export function selectRandomFoodType() {
 
 /**
  * Retorna informações de um power-up pelo ID
- * @param {string} powerUpId - ID do power-up
- * @returns {Object|null} Power-up ou null
+ * @param powerUpId - ID do power-up
+ * @returns Power-up ou null
  */
-export function getPowerUp(powerUpId) {
+export function getPowerUp(powerUpId: string): PowerUp | null {
   return POWER_UPS[powerUpId] || null;
 }
 
 /**
  * Calcula pontos considerando tipo de comida e multiplicadores
- * @param {Object} foodType - Tipo da comida
- * @param {number} levelMultiplier - Multiplicador do nível
- * @param {boolean} hasDoublePoints - Se tem power-up de pontos x2
- * @returns {number} Pontos calculados
+ * @param foodType - Tipo da comida
+ * @param levelMultiplier - Multiplicador do nível
+ * @param hasDoublePoints - Se tem power-up de pontos x2
+ * @returns Pontos calculados
  */
-export function calculateFoodPoints(foodType, levelMultiplier = 1, hasDoublePoints = false) {
+export function calculateFoodPoints(
+  foodType: FoodType,
+  levelMultiplier: number = 1,
+  hasDoublePoints: boolean = false
+): number {
   let points = foodType.pointsBase * foodType.pointsMultiplier;
   
   // Aplica multiplicador de nível

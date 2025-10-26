@@ -1,14 +1,26 @@
-import { GRID_SIZE, CELL_SIZE, COLORS } from '../utils/constants.js';
-import { gridToPixel } from '../utils/helpers.js';
-
 // ============================================
 // 🎲 GRID - Sistema de Coordenadas
 // ============================================
 
+import { GRID_SIZE, CELL_SIZE, COLORS } from '../utils/constants';
+import { gridToPixel } from '../utils/helpers';
+import type { Position } from '../types';
+
 export class Grid {
-  constructor(canvas) {
+  public canvas: HTMLCanvasElement;
+  public ctx: CanvasRenderingContext2D;
+  public gridSize: number;
+  public cellSize: number;
+
+  constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Não foi possível obter contexto 2D do canvas');
+    }
+    
+    this.ctx = context;
     this.gridSize = GRID_SIZE;
     this.cellSize = CELL_SIZE;
   }
@@ -16,7 +28,7 @@ export class Grid {
   /**
    * Desenha o fundo e as linhas do grid
    */
-  draw() {
+  draw(): void {
     // Limpa o canvas
     this.ctx.fillStyle = COLORS.background;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -46,11 +58,11 @@ export class Grid {
 
   /**
    * Desenha uma célula na posição do grid
-   * @param {Object} position - Posição no grid {x, y}
-   * @param {string} color - Cor da célula
-   * @param {boolean} isHead - Se é a cabeça da cobra (desenha diferente)
+   * @param position - Posição no grid
+   * @param color - Cor da célula
+   * @param isHead - Se é a cabeça da cobra (desenha diferente)
    */
-  drawCell(position, color, isHead = false) {
+  drawCell(position: Position, color: string, isHead: boolean = false): void {
     const pixelX = gridToPixel(position.x, this.cellSize);
     const pixelY = gridToPixel(position.y, this.cellSize);
 
@@ -79,10 +91,10 @@ export class Grid {
 
   /**
    * Verifica se uma posição está dentro dos limites do grid
-   * @param {Object} position - Posição {x, y}
-   * @returns {boolean} True se estiver dentro dos limites
+   * @param position - Posição a verificar
+   * @returns True se estiver dentro dos limites
    */
-  isWithinBounds(position) {
+  isWithinBounds(position: Position): boolean {
     return (
       position.x >= 0 &&
       position.x < this.gridSize &&
@@ -93,9 +105,9 @@ export class Grid {
 
   /**
    * Gera uma posição aleatória válida no grid
-   * @returns {Object} Posição aleatória {x, y}
+   * @returns Posição aleatória
    */
-  getRandomPosition() {
+  getRandomPosition(): Position {
     return {
       x: Math.floor(Math.random() * this.gridSize),
       y: Math.floor(Math.random() * this.gridSize),

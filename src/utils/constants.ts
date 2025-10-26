@@ -2,6 +2,8 @@
 // 🎮 CONFIGURAÇÕES DO JOGO
 // ============================================
 
+import type { Colors, DirectionMap, KeyMap } from '../types';
+
 // Tamanho do grid (quantas células)
 export const GRID_SIZE = 20;
 
@@ -20,7 +22,7 @@ export const GAME_SPEED = 150;
 // 🎨 CORES - TEMA MINIMALISTA DARK
 // ============================================
 
-export const COLORS = {
+export const COLORS: Colors = {
   background: '#0a0a0a',
   grid: '#1a1a1a',
   snake: '#333333',
@@ -33,7 +35,7 @@ export const COLORS = {
 // 🕹️ DIREÇÕES
 // ============================================
 
-export const DIRECTIONS = {
+export const DIRECTIONS: DirectionMap = {
   UP: { x: 0, y: -1 },
   DOWN: { x: 0, y: 1 },
   LEFT: { x: -1, y: 0 },
@@ -44,7 +46,7 @@ export const DIRECTIONS = {
 // ⌨️ TECLAS
 // ============================================
 
-export const KEYS = {
+export const KEYS: KeyMap = {
   ArrowUp: 'UP',
   ArrowDown: 'DOWN',
   ArrowLeft: 'LEFT',

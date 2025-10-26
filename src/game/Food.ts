@@ -1,28 +1,34 @@
-import { COLORS } from '../utils/constants.js';
-import { isPositionInList } from '../utils/helpers.js';
-import { selectRandomFoodType } from '../utils/foodTypes.js';
-
 // ============================================
 // 🍎 FOOD - Lógica da Comida
 // ============================================
 
+import { isPositionInList } from '../utils/helpers';
+import { selectRandomFoodType } from '../utils/foodTypes';
+import type { Position, FoodType } from '../types';
+import type { Grid } from './Grid';
+
 export class Food {
-  constructor(grid) {
+  private grid: Grid;
+  public position: Position | null;
+  public type: FoodType | null;
+  
+  // Animação de pulso (fica mais vistosa)
+  private animationTime: number;
+
+  constructor(grid: Grid) {
     this.grid = grid;
     this.position = null;
     this.type = null;
-    
-    // Animação de pulso (fica mais vistosa)
     this.animationTime = 0;
   }
 
   /**
    * Gera uma nova posição para a comida
    * Garante que não spawna em cima da cobra
-   * @param {Array} snakeBody - Array com as posições da cobra
+   * @param snakeBody - Array com as posições da cobra
    */
-  spawn(snakeBody) {
-    let newPosition;
+  spawn(snakeBody: Position[]): void {
+    let newPosition: Position;
     let attempts = 0;
     const maxAttempts = 100;
 
@@ -51,10 +57,10 @@ export class Food {
 
   /**
    * Verifica se a comida foi comida pela cobra
-   * @param {Object} snakeHead - Posição da cabeça da cobra {x, y}
-   * @returns {boolean} True se foi comida
+   * @param snakeHead - Posição da cabeça da cobra
+   * @returns True se foi comida
    */
-  isEaten(snakeHead) {
+  isEaten(snakeHead: Position): boolean {
     if (!this.position) return false;
 
     return (
@@ -66,7 +72,7 @@ export class Food {
   /**
    * Desenha a comida no canvas
    */
-  draw() {
+  draw(): void {
     if (!this.position || !this.type) return;
 
     const ctx = this.grid.ctx;
@@ -136,25 +142,25 @@ export class Food {
 
   /**
    * Retorna a posição atual da comida
-   * @returns {Object|null} Posição {x, y} ou null
+   * @returns Posição ou null
    */
-  getPosition() {
+  getPosition(): Position | null {
     return this.position;
   }
   
   /**
    * Retorna o tipo atual da comida
-   * @returns {Object|null} Tipo da comida ou null
+   * @returns Tipo da comida ou null
    */
-  getType() {
+  getType(): FoodType | null {
     return this.type;
   }
   
   /**
    * Retorna se a comida tem um power-up
-   * @returns {string|null} ID do power-up ou null
+   * @returns ID do power-up ou null
    */
-  getPowerUp() {
+  getPowerUp(): string | null {
     return this.type?.powerUp || null;
   }
 }

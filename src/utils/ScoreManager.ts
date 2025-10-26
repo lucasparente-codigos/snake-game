@@ -2,12 +2,12 @@
 // 🎯 SCORE MANAGER - Sistema de Pontuação
 // ============================================
 
-import { GAME_SPEED } from './constants.js';
+import type { Difficulty, DifficultySettingsMap, GameStats, EatFoodResult } from '../types';
 
 /**
  * Configurações de dificuldade
  */
-const DIFFICULTY_SETTINGS = {
+const DIFFICULTY_SETTINGS: DifficultySettingsMap = {
   easy: {
     baseSpeed: 200,
     speedIncrease: 5,
@@ -28,29 +28,32 @@ const DIFFICULTY_SETTINGS = {
 /**
  * Níveis de progressão (a cada X pontos, sobe de nível)
  */
-const LEVEL_THRESHOLDS = [0, 50, 120, 200, 300, 420, 560, 720, 900, 1100];
+const LEVEL_THRESHOLDS = [0, 50, 120, 200, 300, 420, 560, 720, 900, 1100] as const;
 
 export class ScoreManager {
-  constructor(difficulty = 'medium') {
+  public difficulty: Difficulty;
+  private settings: DifficultySettingsMap[Difficulty];
+  
+  // Estado do score
+  public score: number = 0;
+  public foodEaten: number = 0;
+  public currentStreak: number = 0;
+  public level: number = 1;
+  
+  // Tracking de tempo para combos
+  public lastEatTime: number = 0;
+  private comboTimeWindow: number = 2000; // 2 segundos para manter combo
+
+  constructor(difficulty: Difficulty = 'medium') {
     this.difficulty = difficulty;
     this.settings = DIFFICULTY_SETTINGS[difficulty];
-    
-    // Estado do score
-    this.score = 0;
-    this.foodEaten = 0;
-    this.currentStreak = 0;
-    this.level = 1;
-    
-    // Tracking de tempo para combos
-    this.lastEatTime = 0;
-    this.comboTimeWindow = 2000; // 2 segundos para manter combo
   }
 
   /**
    * Adiciona pontos ao comer comida
-   * @returns {Object} Informações sobre a pontuação
+   * @returns Informações sobre a pontuação
    */
-  eatFood() {
+  eatFood(): EatFoodResult {
     this.foodEaten++;
     this.currentStreak++;
     
@@ -103,9 +106,9 @@ export class ScoreManager {
 
   /**
    * Verifica e atualiza o nível baseado no score
-   * @returns {boolean} True se subiu de nível
+   * @returns True se subiu de nível
    */
-  checkLevelUp() {
+  checkLevelUp(): boolean {
     const newLevel = this.calculateLevel(this.score);
     
     if (newLevel > this.level) {
@@ -118,10 +121,10 @@ export class ScoreManager {
 
   /**
    * Calcula o nível baseado no score
-   * @param {number} score - Pontuação atual
-   * @returns {number} Nível calculado
+   * @param score - Pontuação atual
+   * @returns Nível calculado
    */
-  calculateLevel(score) {
+  calculateLevel(score: number): number {
     for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
       if (score >= LEVEL_THRESHOLDS[i]) {
         return i + 1;
@@ -132,9 +135,9 @@ export class ScoreManager {
 
   /**
    * Calcula a velocidade do jogo baseada no nível
-   * @returns {number} Intervalo em ms (menor = mais rápido)
+   * @returns Intervalo em ms (menor = mais rápido)
    */
-  getGameSpeed() {
+  getGameSpeed(): number {
     const baseSpeed = this.settings.baseSpeed;
     const speedDecrease = (this.level - 1) * this.settings.speedIncrease;
     const newSpeed = Math.max(baseSpeed - speedDecrease, 50); // Min 50ms
@@ -144,9 +147,9 @@ export class ScoreManager {
 
   /**
    * Retorna o progresso até o próximo nível (0-1)
-   * @returns {number} Porcentagem de progresso
+   * @returns Porcentagem de progresso
    */
-  getLevelProgress() {
+  getLevelProgress(): number {
     const currentThreshold = LEVEL_THRESHOLDS[this.level - 1] || 0;
     const nextThreshold = LEVEL_THRESHOLDS[this.level] || currentThreshold + 200;
     
@@ -157,9 +160,9 @@ export class ScoreManager {
 
   /**
    * Retorna pontos necessários para o próximo nível
-   * @returns {number} Pontos faltando
+   * @returns Pontos faltando
    */
-  getPointsToNextLevel() {
+  getPointsToNextLevel(): number {
     const nextThreshold = LEVEL_THRESHOLDS[this.level];
     
     if (!nextThreshold) {
@@ -171,25 +174,25 @@ export class ScoreManager {
 
   /**
    * Verifica se atingiu o nível máximo
-   * @returns {boolean} True se está no nível máximo
+   * @returns True se está no nível máximo
    */
-  isMaxLevel() {
+  isMaxLevel(): boolean {
     return this.level >= LEVEL_THRESHOLDS.length;
   }
 
   /**
    * Reseta o combo (útil quando pausa)
    */
-  resetCombo() {
+  resetCombo(): void {
     this.currentStreak = 0;
     this.lastEatTime = 0;
   }
 
   /**
    * Retorna estatísticas completas
-   * @returns {Object} Todas as stats
+   * @returns Todas as stats
    */
-  getStats() {
+  getStats(): GameStats {
     return {
       score: this.score,
       foodEaten: this.foodEaten,
@@ -204,20 +207,9 @@ export class ScoreManager {
   }
 
   /**
-   * Retorna informações sobre a dificuldade atual
-   * @returns {Object} Info da dificuldade
-   */
-  getDifficultyInfo() {
-    return {
-      name: this.difficulty,
-      ...this.settings,
-    };
-  }
-
-  /**
    * Reseta o score manager
    */
-  reset() {
+  reset(): void {
     this.score = 0;
     this.foodEaten = 0;
     this.currentStreak = 0;

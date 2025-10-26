@@ -2,21 +2,23 @@
 // 💾 STORAGE MANAGER - Gerencia localStorage
 // ============================================
 
+import type { GlobalStats, GameSettings } from '../types';
+
 const STORAGE_KEYS = {
   HIGH_SCORE: 'snake_high_score',
   GAMES_PLAYED: 'snake_games_played',
   TOTAL_FOOD_EATEN: 'snake_total_food_eaten',
   BEST_STREAK: 'snake_best_streak',
   SETTINGS: 'snake_settings',
-};
+} as const;
 
 export class StorageManager {
   /**
    * Salva o high score se for maior que o atual
-   * @param {number} score - Pontuação atual
-   * @returns {boolean} True se salvou um novo record
+   * @param score - Pontuação atual
+   * @returns True se salvou um novo record
    */
-  static saveHighScore(score) {
+  static saveHighScore(score: number): boolean {
     const currentHighScore = this.getHighScore();
     
     if (score > currentHighScore) {
@@ -29,9 +31,9 @@ export class StorageManager {
 
   /**
    * Retorna o high score atual
-   * @returns {number} High score
+   * @returns High score
    */
-  static getHighScore() {
+  static getHighScore(): number {
     const score = localStorage.getItem(STORAGE_KEYS.HIGH_SCORE);
     return score ? parseInt(score, 10) : 0;
   }
@@ -39,43 +41,43 @@ export class StorageManager {
   /**
    * Incrementa o contador de jogos jogados
    */
-  static incrementGamesPlayed() {
+  static incrementGamesPlayed(): void {
     const current = this.getGamesPlayed();
     localStorage.setItem(STORAGE_KEYS.GAMES_PLAYED, (current + 1).toString());
   }
 
   /**
    * Retorna quantos jogos foram jogados
-   * @returns {number} Número de jogos
+   * @returns Número de jogos
    */
-  static getGamesPlayed() {
+  static getGamesPlayed(): number {
     const games = localStorage.getItem(STORAGE_KEYS.GAMES_PLAYED);
     return games ? parseInt(games, 10) : 0;
   }
 
   /**
    * Adiciona comidas comidas ao total
-   * @param {number} amount - Quantidade de comidas
+   * @param amount - Quantidade de comidas
    */
-  static addFoodEaten(amount = 1) {
+  static addFoodEaten(amount: number = 1): void {
     const current = this.getTotalFoodEaten();
     localStorage.setItem(STORAGE_KEYS.TOTAL_FOOD_EATEN, (current + amount).toString());
   }
 
   /**
    * Retorna total de comidas já comidas
-   * @returns {number} Total de comidas
+   * @returns Total de comidas
    */
-  static getTotalFoodEaten() {
+  static getTotalFoodEaten(): number {
     const food = localStorage.getItem(STORAGE_KEYS.TOTAL_FOOD_EATEN);
     return food ? parseInt(food, 10) : 0;
   }
 
   /**
    * Salva o melhor streak (comidas seguidas sem pausar)
-   * @param {number} streak - Streak atual
+   * @param streak - Streak atual
    */
-  static saveBestStreak(streak) {
+  static saveBestStreak(streak: number): void {
     const current = this.getBestStreak();
     
     if (streak > current) {
@@ -85,31 +87,31 @@ export class StorageManager {
 
   /**
    * Retorna o melhor streak
-   * @returns {number} Melhor streak
+   * @returns Melhor streak
    */
-  static getBestStreak() {
+  static getBestStreak(): number {
     const streak = localStorage.getItem(STORAGE_KEYS.BEST_STREAK);
     return streak ? parseInt(streak, 10) : 0;
   }
 
   /**
    * Salva as configurações do jogo
-   * @param {Object} settings - Objeto com configurações
+   * @param settings - Objeto com configurações
    */
-  static saveSettings(settings) {
+  static saveSettings(settings: GameSettings): void {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
   }
 
   /**
    * Retorna as configurações salvas
-   * @returns {Object} Configurações ou defaults
+   * @returns Configurações ou defaults
    */
-  static getSettings() {
+  static getSettings(): GameSettings {
     const settings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     
     if (settings) {
       try {
-        return JSON.parse(settings);
+        return JSON.parse(settings) as GameSettings;
       } catch (error) {
         console.error('Erro ao parsear settings:', error);
         return this.getDefaultSettings();
@@ -121,9 +123,9 @@ export class StorageManager {
 
   /**
    * Retorna configurações padrão
-   * @returns {Object} Configurações default
+   * @returns Configurações default
    */
-  static getDefaultSettings() {
+  static getDefaultSettings(): GameSettings {
     return {
       difficulty: 'medium',
       soundEnabled: false,
@@ -133,9 +135,9 @@ export class StorageManager {
 
   /**
    * Retorna todas as estatísticas
-   * @returns {Object} Objeto com todas as stats
+   * @returns Objeto com todas as stats
    */
-  static getAllStats() {
+  static getAllStats(): GlobalStats {
     return {
       highScore: this.getHighScore(),
       gamesPlayed: this.getGamesPlayed(),
@@ -147,7 +149,7 @@ export class StorageManager {
   /**
    * Reseta todas as estatísticas (útil pra debug/reset)
    */
-  static resetAllStats() {
+  static resetAllStats(): void {
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);
     });
@@ -156,9 +158,9 @@ export class StorageManager {
 
   /**
    * Verifica se o localStorage está disponível
-   * @returns {boolean} True se disponível
+   * @returns True se disponível
    */
-  static isAvailable() {
+  static isAvailable(): boolean {
     try {
       const test = '__storage_test__';
       localStorage.setItem(test, test);

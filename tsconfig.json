@@ -1,0 +1,72 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations":"6.0",
+    // Versão do JavaScript gerada
+    "target": "ES2020",
+    
+    // Sistema de módulos
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    
+    // Permite importar JSON
+    "resolveJsonModule": true,
+    
+    // Permite JS e TS juntos (migração gradual)
+    "allowJs": true,
+    
+    // Verifica arquivos JS também
+    "checkJs": false,
+    
+    // Gera arquivos .d.ts (definições de tipos)
+    "declaration": true,
+    "declarationMap": true,
+    
+    // Source maps para debug
+    "sourceMap": true,
+    
+    // Diretório de saída (Vite gerencia isso)
+    "outDir": "./dist",
+    
+    // Não emite arquivos (Vite faz isso)
+    "noEmit": true,
+    
+    // Strict mode (recomendado!)
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    
+    // Interoperabilidade com CommonJS
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    
+    // Opções do compilador
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    // DOM types (para canvas, etc)
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    
+    // Paths (facilita imports)
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@game/*": ["./src/game/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@types/*": ["./src/types/*"]
+    }
+  },
+  
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

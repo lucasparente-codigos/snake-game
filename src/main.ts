@@ -1,20 +1,25 @@
-import './styles/main.css';
-import { GameEngine } from './game/GameEngine.js';
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/constants.js';
-import { StorageManager } from './utils/StorageManager.js';
-
 // ============================================
 // 🎮 MAIN - Entry Point do Jogo
 // ============================================
 
+import './styles/main.css';
+import { GameEngine } from './game/GameEngine';
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/constants';
+import { StorageManager } from './utils/StorageManager';
+
 /**
  * Inicializa o jogo
  */
-function init() {
+function init(): void {
   console.log('🔧 Iniciando aplicação...');
 
   // Pega o container do app
-  const app = document.querySelector('#app');
+  const app = document.querySelector<HTMLDivElement>('#app');
+  
+  if (!app) {
+    console.error('❌ Elemento #app não encontrado!');
+    return;
+  }
 
   // Pega estatísticas globais
   const globalStats = StorageManager.getAllStats();
@@ -50,7 +55,7 @@ function init() {
   console.log('✅ HTML criado');
 
   // Pega o canvas
-  const canvas = document.getElementById('gameCanvas');
+  const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement | null;
 
   // Verifica se o canvas foi criado
   if (!canvas) {
@@ -74,7 +79,7 @@ function init() {
 
     // Expõe o game no window para debug (remover em produção)
     if (import.meta.env.DEV) {
-      window.game = game;
+      (window as any).game = game;
       console.log('🔧 Debug mode: acesse "window.game" no console');
     }
   } catch (error) {
