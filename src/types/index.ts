@@ -177,7 +177,7 @@ export interface PowerUpDebugInfo {
 /**
  * Estado completo do jogo (para debug/save)
  */
-export interface GameState {
+export interface GameStateData {
   score: number;
   level: number;
   snakeBody: Position[];
@@ -186,4 +186,13 @@ export interface GameState {
   activePowerUps: ActivePowerUp[];
   isGameOver: boolean;
   isPaused: boolean;
+}
+
+/**
+ * Item de menu
+ */
+export interface MenuItem {
+  text: string;
+  action: () => void;
+  enabled?: boolean;
 }
