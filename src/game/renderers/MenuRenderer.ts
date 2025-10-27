@@ -143,7 +143,7 @@ export class MenuRenderer {
   /**
    * Renderiza tela de configurações
    */
-  renderSettingsScreen(settings: { difficulty: string; soundEnabled: boolean; gridLinesEnabled: boolean }): void {
+  renderSettingsScreen(): void {
     this.clearCanvas();
     
     this.drawTitle('⚙️ SETTINGS');
