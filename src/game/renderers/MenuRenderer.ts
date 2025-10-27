@@ -2,7 +2,7 @@
 // 🎨 MENU RENDERER - Renderiza Menus no Canvas
 // ============================================
 
-import { COLORS } from '../../utils/constants';
+import { COLORS } from '../../utils/styles.constants';
 import type { GlobalStats } from '../../types';
 
 interface MenuItem {
@@ -192,7 +192,6 @@ export class MenuRenderer {
       
       // Fundo do item selecionado
       this.ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-      const padding = 20;
       const width = 200;
       const height = 35;
       this.ctx.fillRect(

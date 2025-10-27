@@ -2,7 +2,8 @@
 // 🎲 GRID - Sistema de Coordenadas
 // ============================================
 
-import { GRID_SIZE, CELL_SIZE, COLORS } from '../../utils/constants';
+import { GRID_SIZE, CELL_SIZE } from '../../utils/game.constants';
+import { COLORS } from '../../utils/styles.constants';
 import { gridToPixel } from '../../utils/helpers';
 import type { Position } from '../../types';
 

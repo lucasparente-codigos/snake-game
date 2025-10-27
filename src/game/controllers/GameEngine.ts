@@ -9,7 +9,8 @@
 import { Grid } from '../entities/Grid';
 import { Snake } from '../entities/Snake';
 import { Food } from '../entities/Food';
-import { DIRECTIONS, KEYS, COLORS } from '../../utils/constants';
+import { DIRECTIONS, KEYS } from '../../utils/input.constants';
+import { COLORS } from '../../utils/styles.constants';
 import { ScoreManager } from '../../utils/managers/ScoreManager';
 import { StorageManager } from '../../utils/managers/StorageManager';
 import { PowerUpManager } from '../../utils/managers/PowerUpManager';

@@ -4,7 +4,7 @@
 
 import './styles/main.css';
 import { GameController } from './game/controllers/GameController';
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/constants';
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from './utils/game.constants';
 
 /**
  * Inicializa o jogo
