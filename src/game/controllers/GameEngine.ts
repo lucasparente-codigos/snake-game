@@ -1,9 +1,5 @@
 // ============================================
-// 🎮 GAME ENGINE - Orquestrador do Jogo
-// Sugestões de Melhoria Aplicadas:
-// - Uso de callback onGameOver para melhor encapsulamento.
-// - Encapsulamento da lógica de setInterval em setGameLoop.
-// - Renomeado gameLoopInterval para gameLoopTimerId.
+// 🎮 GAME ENGINE - COM EFEITOS VISUAIS ✨
 // ============================================
 
 import { Grid } from '../entities/Grid';
@@ -15,9 +11,12 @@ import { ScoreManager } from '../../utils/managers/ScoreManager';
 import { StorageManager } from '../../utils/managers/StorageManager';
 import { PowerUpManager } from '../../utils/managers/PowerUpManager';
 import { calculateFoodPoints } from '../../utils/foodTypes';
+import { ParticleSystem } from '../effects/ParticleSystem';
+import { ScreenEffects } from '../effects/ScreenEffects';
+import { FloatingTextSystem } from '../effects/FloatingText';
+import { gridToPixel } from '../../utils/helpers';
 import type { Difficulty } from '../../types';
 
-// Tipo para o callback de Game Over
 type GameOverCallback = (score: number, isNewRecord: boolean) => void;
 
 export class GameEngine {
@@ -31,10 +30,15 @@ export class GameEngine {
   private scoreManager: ScoreManager;
   private powerUpManager: PowerUpManager;
   
+  // 🆕 Sistemas de Efeitos Visuais
+  private particleSystem: ParticleSystem;
+  private screenEffects: ScreenEffects;
+  private floatingTextSystem: FloatingTextSystem;
+  
   // Estado
   private isGameOver: boolean;
   private isPaused: boolean;
-  private gameLoopTimerId: number | null; // Renomeado
+  private gameLoopTimerId: number | null;
   private isNewRecord: boolean;
   private highScore: number;
   
@@ -51,7 +55,7 @@ export class GameEngine {
   constructor(
     canvas: HTMLCanvasElement, 
     difficulty: Difficulty = 'medium',
-    onGameOver: GameOverCallback // Recebe o callback no construtor
+    onGameOver: GameOverCallback
   ) {
     this.canvas = canvas;
     this.onGameOver = onGameOver;
@@ -68,6 +72,11 @@ export class GameEngine {
     this.food = new Food(this.grid);
     this.scoreManager = new ScoreManager(difficulty);
     this.powerUpManager = new PowerUpManager();
+
+    // 🆕 Inicializa sistemas de efeitos
+    this.particleSystem = new ParticleSystem(this.ctx, 500);
+    this.screenEffects = new ScreenEffects(this.canvas, this.ctx);
+    this.floatingTextSystem = new FloatingTextSystem(this.ctx, 50);
 
     // Estado inicial
     this.isGameOver = false;
@@ -87,7 +96,7 @@ export class GameEngine {
     this.powerUpManager.onPowerUpExpired = (powerUpId: string) => {
       console.log(`⏰ Power-up expirou: ${powerUpId}`);
       if (powerUpId === 'slow_motion' || powerUpId === 'speed_boost') {
-        this.setGameLoop(); // Reinicia o loop com a velocidade normal
+        this.setGameLoop();
       }
     };
 
@@ -97,7 +106,7 @@ export class GameEngine {
     // Carrega high score
     this.highScore = StorageManager.getHighScore();
     
-    console.log('🎮 GameEngine inicializado!');
+    console.log('🎮 GameEngine inicializado com efeitos visuais!');
   }
 
   start(): void {
@@ -105,7 +114,6 @@ export class GameEngine {
     this.setGameLoop();
     this.render();
     console.log('🎮 Jogo iniciado!');
-    console.log('📊 Dificuldade:', this.scoreManager.difficulty);
   }
 
   stop(): void {
@@ -116,9 +124,6 @@ export class GameEngine {
     document.removeEventListener('keydown', this.handleKeyPress);
   }
   
-  /**
-   * Encapsula a lógica de iniciar/reiniciar o loop de jogo com a velocidade correta.
-   */
   private setGameLoop(): void {
     if (this.gameLoopTimerId !== null) {
       clearInterval(this.gameLoopTimerId);
@@ -127,8 +132,6 @@ export class GameEngine {
     let speed = this.scoreManager.getGameSpeed();
     const speedModifier = this.powerUpManager.getSpeedModifier();
     speed = Math.floor(speed * speedModifier);
-
-    console.log(`🏃 Velocidade ajustada: ${speed}ms (modifier: ${speedModifier})`);
 
     this.gameLoopTimerId = window.setInterval(() => {
       if (!this.isPaused && !this.isGameOver) {
@@ -139,6 +142,11 @@ export class GameEngine {
   }
 
   private update(): void {
+    // 🆕 Atualiza sistemas de efeitos
+    this.particleSystem.update();
+    this.screenEffects.update();
+    this.floatingTextSystem.update();
+
     this.snake.move();
 
     if (!this.powerUpManager.hasShield() && this.snake.checkCollision()) {
@@ -156,9 +164,11 @@ export class GameEngine {
     
     const foodType = this.food.getType();
     const powerUp = this.food.getPowerUp();
+    const foodPosition = this.food.getPosition();
     
-    if (!foodType) return;
+    if (!foodType || !foodPosition) return;
     
+    // Calcula pontos
     const hasDoublePoints = this.powerUpManager.hasDoublePoints();
     const points = calculateFoodPoints(foodType, 1, hasDoublePoints);
     
@@ -169,6 +179,41 @@ export class GameEngine {
     
     StorageManager.addFoodEaten(1);
     
+    // 🆕 Posição em pixels para efeitos
+    const pixelX = gridToPixel(foodPosition.x, this.grid.cellSize) + this.grid.cellSize / 2;
+    const pixelY = gridToPixel(foodPosition.y, this.grid.cellSize) + this.grid.cellSize / 2;
+    
+    // 🆕 EFEITOS VISUAIS baseados no tipo de comida
+    switch (foodType.id) {
+      case 'normal':
+        this.particleSystem.foodEaten(pixelX, pixelY, foodType.color);
+        this.floatingTextSystem.showPoints(pixelX, pixelY, points);
+        break;
+        
+      case 'golden':
+        this.particleSystem.goldenFoodEaten(pixelX, pixelY);
+        this.screenEffects.onGoldenFoodEaten();
+        this.floatingTextSystem.showPoints(pixelX, pixelY, points);
+        break;
+        
+      case 'diamond':
+        this.particleSystem.diamondEaten(pixelX, pixelY);
+        this.screenEffects.onDiamondEaten();
+        this.floatingTextSystem.showPoints(pixelX, pixelY, points);
+        break;
+        
+      case 'berry':
+        this.particleSystem.foodEaten(pixelX, pixelY, foodType.color);
+        this.floatingTextSystem.showPoints(pixelX, pixelY, points);
+        break;
+    }
+    
+    // 🆕 Mostra combo se tiver
+    if (this.scoreManager.currentStreak > 2) {
+      this.floatingTextSystem.showCombo(pixelX, pixelY, this.scoreManager.currentStreak);
+    }
+    
+    // Power-up
     if (powerUp) {
       const activatedPowerUp = this.powerUpManager.activate(powerUp);
       
@@ -177,18 +222,39 @@ export class GameEngine {
         this.powerUpNotificationText = `${activatedPowerUp.emoji} ${activatedPowerUp.name}!`;
         this.powerUpNotificationTime = Date.now();
         
+        // 🆕 Efeitos do power-up
+        this.screenEffects.onPowerUpActivated(activatedPowerUp.color);
+        this.particleSystem.powerUpActivated(pixelX, pixelY, activatedPowerUp.color);
+        this.floatingTextSystem.showPowerUp(
+          pixelX, 
+          pixelY - 20, 
+          activatedPowerUp.name, 
+          activatedPowerUp.emoji
+        );
+        
         if (powerUp === 'slow_motion' || powerUp === 'speed_boost') {
-          this.setGameLoop(); // Reinicia o loop com a nova velocidade
+          this.setGameLoop();
         }
       }
     }
     
+    // Level up
     const leveledUp = this.scoreManager.checkLevelUp();
     
     if (leveledUp) {
       this.showLevelUpAnimation = true;
       this.levelUpAnimationTime = Date.now();
-      this.setGameLoop(); // Reinicia o loop com a nova velocidade
+      this.setGameLoop();
+      
+      // 🆕 Efeitos de level up
+      this.screenEffects.onLevelUp();
+      this.particleSystem.celebration(this.canvas.width / 2, this.canvas.height / 2);
+      this.floatingTextSystem.showLevelUp(
+        this.canvas.width / 2, 
+        this.canvas.height / 2 - 50, 
+        this.scoreManager.level
+      );
+      
       console.log('🎉 LEVEL UP! Nível:', this.scoreManager.level);
     }
     
@@ -198,10 +264,24 @@ export class GameEngine {
   }
 
   private render(): void {
+    // 🆕 Aplica screen shake (offset da câmera)
+    const offset = this.screenEffects.getOffset();
+    
+    this.ctx.save();
+    this.ctx.translate(offset.x, offset.y);
+    
     // Renderização dos componentes principais
     this.grid.draw();
     this.food.draw();
     this.snake.draw();
+    
+    // 🆕 Desenha partículas (antes do HUD)
+    this.particleSystem.draw();
+    
+    this.ctx.restore();
+    
+    // 🆕 Desenha textos flutuantes (após restore, sem shake)
+    this.floatingTextSystem.draw();
     
     // Renderização do HUD e Status
     this.drawHUD();
@@ -214,6 +294,9 @@ export class GameEngine {
     if (this.showPowerUpNotification) {
       this.drawPowerUpNotification();
     }
+    
+    // 🆕 Desenha flash (último, cobre tudo)
+    this.screenEffects.drawFlash();
 
     if (this.isGameOver) {
       this.drawGameOver();
@@ -402,28 +485,38 @@ export class GameEngine {
     if (this.isGameOver) return;
 
     this.isGameOver = true;
-    this.stop(); // Para o loop de jogo
+    
+    // 🆕 Efeitos de game over
+    const headPos = this.snake.getHead();
+    const pixelX = gridToPixel(headPos.x, this.grid.cellSize) + this.grid.cellSize / 2;
+    const pixelY = gridToPixel(headPos.y, this.grid.cellSize) + this.grid.cellSize / 2;
+    
+    this.particleSystem.gameOver(pixelX, pixelY);
+    this.screenEffects.onGameOver();
+    
+    this.stop();
 
     const finalScore = this.scoreManager.score;
     this.isNewRecord = StorageManager.saveHighScore(finalScore);
     
-    // Salva estatísticas de jogo
+    // 🆕 Efeito de high score
+    if (this.isNewRecord) {
+      this.screenEffects.onHighScore();
+      this.particleSystem.celebration(this.canvas.width / 2, this.canvas.height / 2);
+      this.floatingTextSystem.showHighScore(this.canvas.width / 2, this.canvas.height / 2 - 80);
+    }
+    
     StorageManager.incrementGamesPlayed();
-    // Não existe um método addScore no StorageManager. Vamos remover a chamada.
     
     console.log(`💀 GAME OVER. Score: ${finalScore}. Novo Recorde: ${this.isNewRecord}`);
     
-    // Renderiza a tela de Game Over imediatamente
     this.render();
-
-    // Chama o callback para o GameController lidar com a transição de estado
     this.onGameOver(finalScore, this.isNewRecord);
   }
 
   private handleKeyPress(event: KeyboardEvent): void {
     const key = event.key;
     
-    // Previne scroll com as setas e espaço
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) {
       event.preventDefault();
     }

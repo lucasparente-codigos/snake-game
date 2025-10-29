@@ -1,43 +1,46 @@
 // ============================================
-// 🍎 FOOD - Lógica da Comida
+// 🍎 FOOD - Lógica da Comida COM TRAIL ✨
 // ============================================
 
 import { isPositionInList } from '../../utils/helpers';
 import { selectRandomFoodType } from '../../utils/foodTypes';
 import type { Position, FoodType } from '../../types';
 import type { Grid } from './Grid';
+import type { ParticleSystem } from '../effects/ParticleSystem';
 
 export class Food {
   private grid: Grid;
   public position: Position | null;
   public type: FoodType | null;
   
-  // Animação de pulso (fica mais vistosa)
+  // Animação de pulso
   private animationTime: number;
+  
+  // 🆕 Trail para comidas raras
+  private particleSystem: ParticleSystem | null = null;
+  private lastTrailTime: number = 0;
+  private trailInterval: number = 100; // ms entre cada trail particle
 
-  constructor(grid: Grid) {
+  constructor(grid: Grid, particleSystem?: ParticleSystem) {
     this.grid = grid;
     this.position = null;
     this.type = null;
     this.animationTime = 0;
+    this.particleSystem = particleSystem || null;
   }
 
   /**
    * Gera uma nova posição para a comida
-   * Garante que não spawna em cima da cobra
-   * @param snakeBody - Array com as posições da cobra
    */
   spawn(snakeBody: Position[]): void {
     let newPosition: Position;
     let attempts = 0;
     const maxAttempts = 100;
 
-    // Tenta encontrar uma posição válida
     do {
       newPosition = this.grid.getRandomPosition();
       attempts++;
 
-      // Previne loop infinito (caso improvável do grid estar cheio)
       if (attempts >= maxAttempts) {
         console.warn('Não conseguiu encontrar posição válida para a comida');
         break;
@@ -45,11 +48,7 @@ export class Food {
     } while (isPositionInList(newPosition, snakeBody));
 
     this.position = newPosition;
-    
-    // Seleciona tipo aleatório baseado em raridade
     this.type = selectRandomFoodType();
-    
-    // Reseta animação
     this.animationTime = Date.now();
     
     console.log(`🍎 Comida spawnou: ${this.type.name} (${this.type.pointsBase} pts)`);
@@ -57,8 +56,6 @@ export class Food {
 
   /**
    * Verifica se a comida foi comida pela cobra
-   * @param snakeHead - Posição da cabeça da cobra
-   * @returns True se foi comida
    */
   isEaten(snakeHead: Position): boolean {
     if (!this.position) return false;
@@ -67,6 +64,30 @@ export class Food {
       snakeHead.x === this.position.x &&
       snakeHead.y === this.position.y
     );
+  }
+
+  /**
+   * Atualiza a comida (trail particles)
+   */
+  update(): void {
+    if (!this.position || !this.type || !this.particleSystem) return;
+
+    // 🆕 Apenas comidas especiais tem trail
+    const shouldHaveTrail = this.type.id === 'diamond' || this.type.id === 'golden';
+    
+    if (!shouldHaveTrail) return;
+
+    // Limita frequência do trail
+    const now = Date.now();
+    if (now - this.lastTrailTime < this.trailInterval) return;
+    
+    this.lastTrailTime = now;
+
+    // Cria trail na posição da comida
+    const pixelX = this.position.x * this.grid.cellSize + this.grid.cellSize / 2;
+    const pixelY = this.position.y * this.grid.cellSize + this.grid.cellSize / 2;
+    
+    this.particleSystem.createTrail(pixelX, pixelY, this.type.color);
   }
 
   /**
@@ -81,20 +102,20 @@ export class Food {
     const centerX = pixelX + this.grid.cellSize / 2;
     const centerY = pixelY + this.grid.cellSize / 2;
     
-    // Animação de pulso (oscila entre 0.9 e 1.1)
+    // Animação de pulso
     const elapsed = (Date.now() - this.animationTime) / 1000;
     const pulse = 1 + Math.sin(elapsed * 3) * 0.1;
     
     const baseRadius = this.grid.cellSize / 3;
     const radius = baseRadius * pulse;
 
-    // Desenha círculo principal com cor do tipo
+    // Desenha círculo principal
     ctx.fillStyle = this.type.color;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Adiciona um brilho (efeito visual)
+    // Brilho
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.beginPath();
     ctx.arc(
@@ -106,7 +127,7 @@ export class Food {
     );
     ctx.fill();
     
-    // Se for comida especial (não normal), desenha um anel externo
+    // Anel para comidas especiais
     if (this.type.id !== 'normal') {
       ctx.strokeStyle = this.type.color;
       ctx.lineWidth = 2;
@@ -117,14 +138,13 @@ export class Food {
       ctx.globalAlpha = 1;
     }
     
-    // Se for comida MUITO rara (diamond), adiciona efeito de brilho extra
+    // Brilhos extras para diamond
     if (this.type.id === 'diamond') {
       const sparkleTime = (Date.now() / 200) % (Math.PI * 2);
       const sparkleSize = 2 + Math.sin(sparkleTime) * 1;
       
       ctx.fillStyle = '#ffffff';
       
-      // Brilhos nas 4 direções
       const sparklePositions = [
         { x: centerX, y: centerY - radius * 1.3 },
         { x: centerX + radius * 1.3, y: centerY },
@@ -140,26 +160,14 @@ export class Food {
     }
   }
 
-  /**
-   * Retorna a posição atual da comida
-   * @returns Posição ou null
-   */
   getPosition(): Position | null {
     return this.position;
   }
   
-  /**
-   * Retorna o tipo atual da comida
-   * @returns Tipo da comida ou null
-   */
   getType(): FoodType | null {
     return this.type;
   }
   
-  /**
-   * Retorna se a comida tem um power-up
-   * @returns ID do power-up ou null
-   */
   getPowerUp(): string | null {
     return this.type?.powerUp || null;
   }

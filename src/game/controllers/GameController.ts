@@ -113,11 +113,7 @@ export class GameController {
         break;
         
       case GameState.SETTINGS:
-        this.menuRenderer.renderSettingsScreen({
-          difficulty: this.difficulty,
-          soundEnabled: this.soundEnabled,
-          gridLinesEnabled: this.gridLinesEnabled,
-        });
+        this.menuRenderer.renderSettingsScreen();
         break;
     }
   }
